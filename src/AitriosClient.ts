@@ -42,7 +42,7 @@ export class AitriosClient {
             const data = await response.json() as TokenResponse;
             return data.access_token;
         } catch (error) {
-            console.error('アクセストークンの取得に失敗しました:', error);
+            console.error('Failed to get access token:', error);
             throw error;
         }
     }
@@ -67,13 +67,13 @@ export class AitriosClient {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(`デバイス情報の取得に失敗しました。ステータス: ${response.status}, エラー: ${JSON.stringify(errorData)}`);
+                throw new Error(`Failed to get device information. Status: ${response.status}, Error: ${JSON.stringify(errorData)}`);
             }
 
             const deviceInfo = await response.json() as DeviceInfo;
             return deviceInfo;
         } catch (error) {
-            console.error('デバイス情報の取得中にエラーが発生しました:', error);
+            console.error('Error occurred while getting device information:', error);
             throw error;
         }
     }
@@ -91,13 +91,13 @@ export class AitriosClient {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(`推論結果の取得に失敗しました。ステータス: ${response.status}, エラー: ${JSON.stringify(errorData)}`);
+                throw new Error(`Failed to get inference results. Status: ${response.status}, Error: ${JSON.stringify(errorData)}`);
             }
 
             const inferenceResults = await response.json() as InferenceResult[];
             return inferenceResults;
         } catch (error) {
-            console.error('推論結果の取得中にエラーが発生しました:', error);
+            console.error('Error occurred while getting inference results:', error);
             throw error;
         }
     }
@@ -115,40 +115,40 @@ export class AitriosClient {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(`推論結果詳細の取得に失敗しました。ステータス: ${response.status}, エラー: ${JSON.stringify(errorData)}`);
+                throw new Error(`Failed to get inference result details. Status: ${response.status}, Error: ${JSON.stringify(errorData)}`);
             }
 
             const inferenceDetail = await response.json() as DecodedInferenceDetail;
 
-            // 推論データのデコード
+            // Decode inference data
             if (inferenceDetail.Inferences?.[0]?.O) {
                 inferenceDetail.decodedResults = await this.decodeInferenceData(inferenceDetail.Inferences[0].O);
             }
 
             return inferenceDetail;
         } catch (error) {
-            console.error('推論結果詳細の取得中にエラーが発生しました:', error);
+            console.error('Error occurred while getting inference result details:', error);
             throw error;
         }
     }
 
     async decodeInferenceData(base64Data: string): Promise<Inference[]> {
         try {
-            // Base64デコード
+            // Decode Base64
             const decodedData = Buffer.from(base64Data, 'base64');
             
-            // flatbuffersを使用してデシリアライズ
+            // Deserialize using flatbuffers
             const pplOut = SmartCamera.ObjectDetectionTop.getRootAsObjectDetectionTop(
                 new flatbuffers.ByteBuffer(decodedData)
             );
             const readObjData = pplOut.perception();
             if (!readObjData) {
-                throw new Error('perception データが null です');
+                throw new Error('perception data is null');
             }
             const resNum = readObjData.objectDetectionListLength();
             const results: Inference[] = [];
 
-            // 検出されたオブジェクトの情報を収集
+            // Collect information about detected objects
             for (let i = 0; i < resNum; i++) {
                 const objList = readObjData.objectDetectionList(i);
                 if (!objList) {
@@ -174,7 +174,7 @@ export class AitriosClient {
             }
             return results;
         } catch (error) {
-            console.error('推論データのデコード中にエラーが発生しました:', error);
+            console.error('Error occurred while decoding inference data:', error);
             throw error;
         }
     }

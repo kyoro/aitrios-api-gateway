@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AITRIOS Data Display</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-size: 60vw;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="counter">-</div>
+    <script>
+        const deviceId = 'YOUR_DEVICE_ID';
+        async function fetchData() {
+            try {
+                const response = await fetch(`http://localhost:3000/devices/${deviceId}/result`);
+                const data = await response.json();
+                
+                // Count of detected objects
+                const count = data.detectedObjects.length;
+                
+                // Apply to HTML
+                document.getElementById('counter').textContent = count;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        
+        // Call API every 1 second
+        setInterval(fetchData, 1000);
+        
+        // First execution
+        fetchData();
+    </script>
+</body>
+</html>
